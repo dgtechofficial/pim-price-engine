@@ -2,15 +2,13 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # Change to "master" if that's your default branch
+    branches: ["main"]
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -19,17 +17,22 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps: deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }} # <-- Fixed the colon here
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # OPTIONAL: If using Node/Vite/React, uncomment these 3 lines to build your project
-      # - name: Install and Build
-      #   run: |
-      #     npm ci
-      #     npm run build
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install and Build
+        run: |
+          npm ci
+          npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -37,8 +40,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # If a vanilla site, use ".". If using Vite/React, change to "./dist"
-          path: "." 
+          # Change to "." if you are using vanilla HTML/CSS without a build step
+          path: "./dist" 
 
       - name: Deploy to GitHub Pages
         id: deployment
