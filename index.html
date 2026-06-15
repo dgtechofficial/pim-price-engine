@@ -10,20 +10,33 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./assets/style.css">
 </head>
+
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen antialiased selection:bg-indigo-500 selection:text-white">
 
 <div class="px-4 py-6 lg:px-8 max-w-[1920px] mx-auto">
     
+    <!-- HEADER -->
     <header class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-5 gap-4">
+        
         <div class="flex items-center space-x-3">
-            <div>
-                <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-3">
-                    PIM Price Engine
-                    <button id="open-settings" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-600 font-medium text-[11px] py-1 px-2.5 rounded-md transition flex items-center gap-1.5 focus:outline-none">
-                        <i class="fa-solid fa-sliders text-indigo-400 text-[10px]"></i> Channel Mappings
-                    </button>
-                </h1>
-            </div>
+            
+            <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                PIM Price Engine
+                
+                <!-- Existing settings button -->
+                <button id="open-settings" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-600 font-medium text-[11px] py-1 px-2.5 rounded-md transition flex items-center gap-1.5 focus:outline-none">
+                    <i class="fa-solid fa-sliders text-indigo-400 text-[10px]"></i> Channel Mappings
+                </button>
+
+                <!-- NEW NAVIGATION BUTTON -->
+                <button 
+                    onclick="window.location.href='modifier.html'"
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] py-1 px-2.5 rounded-md transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    Modifier Page
+                </button>
+
+            </h1>
         </div>
     </header>
 
