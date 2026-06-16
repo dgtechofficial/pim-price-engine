@@ -148,27 +148,27 @@ class UIController {
 
     stageExportRows(row, f2IdMap, mulParId, refSku, isInheritedFallback, matchedPriceRow, parentPriceRow, rowMultiplier, parentMultiplier) {
         // Uses custom reference constants values
-        const channels = [
+        const Channel = [
             { name: this.constants.APOLLO, startIdx: this.engine.FILE1_COL.APOLLO },
             { name: this.constants.GRAB, startIdx: this.engine.FILE1_COL.GRAB },
             { name: this.constants.FOODPANDA, startIdx: this.engine.FILE1_COL.FOODPANDA }
         ];
-        channels.forEach(ch => {
+        Channel.forEach(ch => {
             this.state.exportRows.push({
                 "Product ID": row[this.engine.FILE2_COL.ID] ?? "",
                 "Name": row[this.engine.FILE2_COL.PRODUCT] ?? "",
-                "channel": ch.name,
+                "Channel": ch.name,
                 // "ironman_reference_sku": isInheritedFallback ? String(f2IdMap[mulParId]?.[this.engine.FILE2_COL.IRONMAN_REFERENCE_SKU] ?? "") : refSku,
-                "10%": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 2, rowMultiplier, parentMultiplier),
-                "pickup 10%": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 2, rowMultiplier, parentMultiplier),
-                "15%": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 3, rowMultiplier, parentMultiplier),
-                "pickup 15%": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 3, rowMultiplier, parentMultiplier),
-                "20%": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 4, rowMultiplier, parentMultiplier),
-                "pickup 20%": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 4, rowMultiplier, parentMultiplier),
-                "5%": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 1, rowMultiplier, parentMultiplier),
-                "pickup 5%": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 1, rowMultiplier, parentMultiplier),
-                "channel standard": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 0, rowMultiplier, parentMultiplier),
-                "pickup standard": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 0, rowMultiplier, parentMultiplier),
+                "10% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 2, rowMultiplier, parentMultiplier),
+                "10% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 2, rowMultiplier, parentMultiplier),
+                "15% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 3, rowMultiplier, parentMultiplier),
+                "15% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 3, rowMultiplier, parentMultiplier),
+                "20% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 4, rowMultiplier, parentMultiplier),
+                "20% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 4, rowMultiplier, parentMultiplier),
+                "5% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 1, rowMultiplier, parentMultiplier),
+                "5% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 1, rowMultiplier, parentMultiplier),
+                "Standard Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 0, rowMultiplier, parentMultiplier),
+                "Standard Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 0, rowMultiplier, parentMultiplier),
                 "Core Menu": row[this.engine.FILE2_COL.PIM_CORE_MENU] ?? "", // Maps directly from structure schema if index exists
                 "Categories": row[this.engine.FILE2_COL.PIM_CATEGORIES] ?? "", // Falls back to class if blank
                 "SKU": row[this.engine.FILE2_COL.PIM_SKU] ?? "", // Active product structural stock identifier
@@ -342,12 +342,12 @@ $(document).ready(() => {
     $("#export-button-target-group").on("click", ".export-btn", function (e) {
         e.preventDefault();
         const chName = $(this).attr("data-channel");
-        const rows = ui.state.exportRows.filter(r => r.channel === chName);
+        const rows = ui.state.exportRows.filter(r => r["Channel"] === chName);
         if (!rows.length) return alert(`No record mutations staged for channel value: ${chName}`);
         
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Calculated Channel Matrix");
-        XLSX.writeFile(wb, `PIM_Calculated_${chName.replace(/\s+/g, '_')}_Manifest.xlsx`);
+        XLSX.writeFile(wb, `PIM_${chName.replace(/\s+/g, '_')}.xlsx`);
     });
 });
