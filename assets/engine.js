@@ -61,7 +61,7 @@ window.ExcelReader = class ExcelReader {
  */
 window.PriceEngine = class PriceEngine {
     constructor() {
-        this.FILE2_COL = { ID: 0, PRODUCT: 2, SKU: 3, IRONMAN_REFERENCE_SKU: 4, PIM_CLASS: 5, PIM_PARENT: 7, PIM_MULTIPLIER: 8, PIM_MULTIPLIER_ID: 9 };
+        this.FILE2_COL = { ID: 0, PRODUCT: 2, SKU: 3, IRONMAN_REFERENCE_SKU: 4, PIM_CLASS: 5, PIM_PARENT: 7, PIM_MULTIPLIER: 8, PIM_MULTIPLIER_ID: 9, PIM_CORE_MENU : 10, PIM_CATEGORIES : 11, PIM_SKU : 12 , PIM_STATUS : 13};
         this.FILE1_COL = { SKU: 1, PICKUP: 2, APOLLO: 7, GRAB: 12, FOODPANDA: 17 };
     }
 
