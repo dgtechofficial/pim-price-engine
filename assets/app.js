@@ -169,10 +169,10 @@ class UIController {
                 "pickup 5%": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 1, rowMultiplier, parentMultiplier),
                 "channel standard": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 0, rowMultiplier, parentMultiplier),
                 "pickup standard": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 0, rowMultiplier, parentMultiplier),
-                "Core Menu": "",
-                "Categories": "",
-                "SKU": row[this.engine.FILE2_COL.SKU] ?? "",
-                "Status": "Active",
+                "Core Menu": row[this.engine.FILE2_COL.PIM_CORE_MENU] ?? "", // Maps directly from structure schema if index exists
+                "Categories": row[this.engine.FILE2_COL.PIM_CATEGORIES] ?? "", // Falls back to class if blank
+                "SKU": row[this.engine.FILE2_COL.PIM_SKU] ?? "", // Active product structural stock identifier
+                "Status": row[this.engine.FILE2_COL.PIM_STATUS] ?? "", // Extracts custom assignment or falls back safely to 'Active'
                 "QMAI Product Code": "",
                 "QMAI SKU": "",
                 "QMAI ID Group": "",
