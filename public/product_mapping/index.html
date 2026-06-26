@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIM CATEGORY MANAGER</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/style.css">
+    <style>
+        /* Custom scrollbar matching your theme */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #020617; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+<div class="app-shell flex min-h-screen">
+    <aside class="sidebar hidden xl:flex flex-col">
+        <div class="sidebar-brand">
+            <a href="../index.html" class="flex items-center gap-3">
+                <span class="brand-mark text-base">P</span>
+                <div>
+                    <p class="text-[10px] uppercase tracking-[0.35em] text-slate-500">PIM SaaS</p>
+                    <h2 class="text-lg font-bold text-white">Product Mapping</h2>
+                </div>
+            </a>
+        </div>
+        <nav class="sidebar-nav flex-1">
+            <a href="../index.html" class="sidebar-link">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Price Engine</span>
+            </a>
+            <a href="../modifier.html" class="sidebar-link">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Modifier Studio</span>
+            </a>
+            <a href="./index.html" class="sidebar-link sidebar-link-active">
+                <i class="fa-solid fa-sitemap"></i>
+                <span>Product Mapping</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="font-semibold text-slate-300 mb-2">Workspace</div>
+            Static PIM suite served by Express.
+        </div>
+    </aside>
+
+    <div class="flex-1">
+        <main class="main-content p-2">
+            <div class="max-w-[1920px] mx-auto">
+
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+        
+        <div class="xl:col-span-3 space-y-6">
+            
+            <div class="bg-slate-950/20 border border-slate-800 rounded-xl p-5 shadow-xl backdrop-blur-md">
+                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span class="w-4 h-4 bg-indigo-950 text-indigo-400 rounded-md flex items-center justify-center text-[10px] border border-indigo-800/50">01</span>
+                    Data Ingestion Module
+                </h2>
+                
+                <div class="mb-4">
+                    <label class="block text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-2">Menu Structure Spreadsheet (CSV)</label>
+                    <label class="flex flex-col items-center justify-center border border-dashed border-blue-900 bg-blue-950/20 rounded-xl p-6 cursor-pointer hover:bg-blue-950/40 transition group relative">
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-blue-500 group-hover:scale-110 transition mb-2"></i>
+                        <span id="csv-file-label" class="text-[11px] font-medium text-slate-400 text-center max-w-[200px] truncate">Load menu matrix csv</span>
+                        <input type="file" id="csv-uploader" accept=".csv" class="hidden">
+                    </label>
+                </div>
+
+                <button id="clear-state" class="w-full bg-slate-800 hover:bg-slate-700/80 text-slate-300 font-bold text-xs py-2 px-4 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-power-off text-[10px]"></i> Reinitialize State
+                </button>
+            </div>
+
+            <div class="bg-slate-950/20 border border-slate-800 rounded-xl p-5 shadow-xl">
+                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <span class="w-4 h-4 bg-emerald-950 text-emerald-400 rounded-md flex items-center justify-center text-[10px] border border-emerald-800/50">02</span>
+                    Category Directory
+                </h2>
+                <p class="text-[10px] text-slate-400 mb-4">Isolated multi-structures sorted alphabetically. Select node to project internal arrays.</p>
+                
+                <div class="relative">
+                    <select id="category-dropdown" disabled class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-400 focus:outline-none focus:border-indigo-500 transition cursor-not-allowed appearance-none">
+                        <option value="">Awaiting active ingestion pipeline...</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="xl:col-span-9 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto pr-2 custom-scrollbar">
+            
+            <div class="bg-slate-900 rounded-xl border border-slate-800 shadow-2xl overflow-hidden">
+                <div class="px-5 py-3 border-b border-slate-800 bg-slate-950/40 flex justify-between items-center">
+                    <h3 class="text-xs font-bold tracking-wider text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-emerald-500"></i> Projected Category Pipeline (Alphabetized Output Arrays)
+                    </h3>
+                    <span id="record-counter" class="text-[10px] font-mono bg-slate-950 text-slate-400 border border-slate-800 px-2 py-0.5 rounded font-bold">Pipeline Empty</span>
+                </div>
+                
+                <div class="overflow-auto max-h-[700px] border-t border-slate-950 relative custom-scrollbar">
+                    <table class="w-full text-[11px] border-collapse text-left" id="output-matrix-table">
+                        <thead class="bg-slate-950/80 sticky top-0 text-[10px] font-mono text-slate-400 uppercase tracking-wider border-b border-slate-800 backdrop-blur-sm z-10">
+                            <tr>
+                                <th class="p-3 border-r border-slate-850">Product ID</th>
+                                <th class="p-3 border-r border-slate-850">Product Name</th>
+                                <th class="p-3 border-r border-slate-850">SKU</th>
+                                <th class="p-3 border-r border-slate-850">Modifiers / Names</th>
+                                <th class="p-3">Components</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 bg-slate-900/40">
+                            <tr>
+                                <td colspan="5" class="p-12 text-center text-slate-500 italic font-normal">
+                                    <i class="fa-solid fa-folder-open block text-xl mb-2 text-slate-600"></i> No relational matrix models generated. Upload a system CSV file to parse datasets.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // System Local Cache State
+    let parsedDataset = [];
+    let discoveredCategories = [];
+
+    $(document).ready(function() {
+        // Ingestion File Uploader Pipeline Listener
+        $('#csv-uploader').on('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            $('#csv-file-label').text(file.name).addClass('text-indigo-400');
+
+            // Ingest and transform streaming buffers utilizing PapaParse
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: true,
+                complete: function(results) {
+                    processUploadedData(results.data);
+                },
+                error: function(err) {
+                    alert("Fatal ingestion anomaly detected during parsing pipeline structural schemas: " + err.message);
+                }
+            });
+        });
+
+        // Dropdown selection trigger downstream matrix array render
+        $('#category-dropdown').on('change', function() {
+            renderFilteredTargetCategory($(this).value || this.value);
+        });
+
+        // Hard reinitialization of client memory states
+        $('#clear-state').on('click', function() {
+            resetPipelineEngine();
+        });
+    });
+
+    // Ingestion processing logic
+    function processUploadedData(rawArray) {
+        // Core normalization sanitizing spaces inside header hashes
+        parsedDataset = rawArray.map(row => {
+            let normalizedRow = {};
+            for (let key in row) {
+                if (row.hasOwnProperty(key)) {
+                    normalizedRow[key.trim()] = row[key] !== null ? String(row[key]).trim() : '';
+                }
+            }
+            return normalizedRow;
+        });
+
+        // Dynamic key assertion checking for mandatory array properties
+        if(parsedDataset.length > 0 && !('category_names' in parsedDataset[0])) {
+            alert("Structural Validation Fault: Missing required property 'category_names' in file configuration.");
+            resetPipelineEngine();
+            return;
+        }
+
+        // Loop array values extracting and segmenting multi-valued categories separated by commas
+        let categorySet = new Set();
+        parsedDataset.forEach(row => {
+            if (row.category_names) {
+                row.category_names.split(',').forEach(category => {
+                    let sanitizedNode = category.trim();
+                    if(sanitizedNode && sanitizedNode.toLowerCase() !== 'nan') {
+                        categorySet.add(sanitizedNode);
+                    }
+                });
+            }
+        });
+
+        // Convert set to array models and arrange alphabetically
+        discoveredCategories = Array.from(categorySet).sort((a, b) => a.localeCompare(b));
+
+        // Inject configurations down into structural UI drop lists
+        const dropdownElement = $('#category-dropdown');
+        dropdownElement.empty().append('<option value="">-- Direct selection to active node category --</option>');
+        
+        discoveredCategories.forEach(cat => {
+            dropdownElement.append(`<option value="${cat}">${cat}</option>`);
+        });
+
+        // Update control properties unlocking user inputs
+        dropdownElement.prop('disabled', false).removeClass('cursor-not-allowed text-slate-400').addClass('text-indigo-400 border-indigo-900/80 bg-slate-950');
+        $('#record-counter').text(`Loaded ${parsedDataset.length} Base Records`).addClass('text-blue-400 border-blue-900 bg-blue-950/40');
+        
+        // Auto select top index node to instantly projection target views
+        if(discoveredCategories.length > 0) {
+            dropdownElement.val(discoveredCategories[0]);
+            renderFilteredTargetCategory(discoveredCategories[0]);
+        }
+    }
+
+    // Render operations handling alphabetized tabular calculations mapping matching datasets
+    function renderFilteredTargetCategory(targetCategory) {
+        if (!targetCategory) {
+            renderEmptyTablePlaceholder();
+            return;
+        }
+
+        // Run validation filtering matching patterns within multi-valued strings
+        let filteredArray = parsedDataset.filter(row => {
+            if (!row.category_names) return false;
+            return row.category_names.split(',').map(c => c.trim().toLowerCase()).includes(targetCategory.toLowerCase());
+        });
+
+        // Core business logic directive: Order rows matching alphabetical product strings
+        filteredArray.sort((a, b) => {
+            let valA = (a.product_name || '').toLowerCase();
+            let valB = (b.product_name || '').toLowerCase();
+            return valA.localeCompare(valB);
+        });
+
+        // Update records structural statistics tag indicators
+        $('#record-counter').html(`<span class="text-emerald-400">${filteredArray.length} Items</span> projected under ${targetCategory}`)
+            .removeClass('text-slate-400 border-slate-800 bg-slate-950')
+            .addClass('text-emerald-400 border-emerald-900 bg-emerald-950/40');
+
+        const tableBody = $('#output-matrix-table tbody');
+        tableBody.empty();
+
+        if (filteredArray.length === 0) {
+            renderEmptyTablePlaceholder();
+            return;
+        }
+
+        // Loop matching rows projecting structural DOM markup blocks inside data pipelines
+        filteredArray.forEach(row => {
+            // Build visual representations showing modifier groupings cleanly
+            let modifierSegment = `<span class="text-slate-600 italic">None</span>`;
+            if (row.modifier_names || row.modifier_ids) {
+                modifierSegment = `
+                    <div class="font-medium text-indigo-300">${row.modifier_names || ''}</div>
+                    <div class="text-[10px] font-mono text-slate-500 mt-0.5">IDs: ${row.modifier_ids || 'N/A'}</div>
+                `;
+            }
+
+            let rowMarkup = `
+                <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">
+                    <td class="p-3 font-mono text-slate-400 border-r border-slate-850">${row.product_id || ''}</td>
+                    <td class="p-3 font-bold text-white max-w-xs truncate">${row.product_name || ''}</td>
+                    <td class="p-3 font-mono text-slate-500 border-r border-slate-850 max-w-xs truncate" title="${row.product_sku || ''}">
+                        ${row.product_sku ? row.product_sku : '<span class="text-slate-700 italic">No SKU mapping</span>'}
+                    </td>
+                    <td class="p-3 border-r border-slate-850 max-w-sm">${modifierSegment}</td>
+                    <td class="p-3 font-sans text-slate-400 max-w-xs truncate" title="${row.components || ''}">
+                        ${row.components || '<span class="text-slate-600 italic">None</span>'}
+                    </td>
+                </tr>
+            `;
+            tableBody.append(rowMarkup);
+        });
+    }
+
+    function renderEmptyTablePlaceholder() {
+        $('#output-matrix-table tbody').html(`
+            <tr>
+                <td colspan="5" class="p-12 text-center text-slate-500 italic font-normal">
+                    <i class="fa-solid fa-magnifying-glass block text-xl mb-2 text-slate-600"></i> No records identified matching selected categorization scopes.
+                </td>
+            </tr>
+        `);
+    }
+
+    // Flush runtime properties restoring back clean system architectures
+    function resetPipelineEngine() {
+        parsedDataset = [];
+        discoveredCategories = [];
+        $('#csv-uploader').val('');
+        $('#csv-file-label').text('Load menu matrix csv').removeClass('text-indigo-400');
+        $('#category-dropdown').empty().append('<option value="">Awaiting active ingestion pipeline...</option>')
+            .prop('disabled', true).addClass('cursor-not-allowed text-slate-400').removeClass('text-indigo-400 border-indigo-900/80 bg-slate-950');
+        $('#record-counter').text('Pipeline Empty').removeClass('text-emerald-400 text-blue-400 border-emerald-900 border-blue-900 bg-emerald-950/40').addClass('text-slate-400 border-slate-800 bg-slate-950');
+        renderEmptyTablePlaceholder();
+    }
+</script>
+</body>
+</html>
