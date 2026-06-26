@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIM Engine - Modifier Studio</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #020617; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white overflow-hidden">
+    
+    <div class="app-shell flex h-screen max-h-screen w-screen overflow-hidden">
+        
+        <div id="sidebar-container" class="h-full flex shrink-0"></div>
+
+        <div class="flex-1 flex flex-col min-w-0 h-full max-h-screen overflow-hidden">
+            <main class="main-content p-6 flex-1 overflow-y-auto custom-scrollbar bg-slate-900/20">
+                <div class="max-w-[1920px] mx-auto space-y-6 h-full flex flex-col">
+
+                    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch shrink-0">
+                        
+                        <div class="xl:col-span-9 bg-slate-850/70 border border-slate-800 rounded-xl p-5 shadow-xl backdrop-blur-md flex flex-col justify-center">
+                            <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <span class="w-4 h-4 bg-indigo-950 text-indigo-400 rounded-md flex items-center justify-center text-[10px] border border-indigo-800/50">01</span>
+                                Structural Data Ingestion Pipeline
+                            </h2>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <label class="flex flex-col items-center justify-center border border-dashed border-blue-900 bg-blue-950/10 rounded-xl p-4 cursor-pointer hover:bg-blue-950/20 transition group relative">
+                                    <i class="fa-solid fa-folder text-lg text-blue-500 group-hover:scale-110 transition mb-1"></i>
+                                    <span id="file1-label" class="text-[11px] font-medium text-slate-400 text-center truncate max-w-full">Categories (File 1)</span>
+                                    <input type="file" id="file1" class="hidden">
+                                </label>
+                                
+                                <label class="flex flex-col items-center justify-center border border-dashed border-emerald-900 bg-emerald-950/10 rounded-xl p-4 cursor-pointer hover:bg-emerald-950/20 transition group relative">
+                                    <i class="fa-solid fa-sliders text-lg text-emerald-500 group-hover:scale-110 transition mb-1"></i>
+                                    <span id="file2-label" class="text-[11px] font-medium text-slate-400 text-center truncate max-w-full">Product Modifiers (File 2)</span>
+                                    <input type="file" id="file2" class="hidden">
+                                </label>
+                                
+                                <label class="flex flex-col items-center justify-center border border-dashed border-purple-900 bg-purple-950/10 rounded-xl p-4 cursor-pointer hover:bg-purple-950/20 transition group relative">
+                                    <i class="fa-solid fa-list-check text-lg text-purple-500 group-hover:scale-110 transition mb-1"></i>
+                                    <span id="file3-label" class="text-[11px] font-medium text-slate-400 text-center truncate max-w-full">Modifier Contents (File 3)</span>
+                                    <input type="file" id="file3" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="xl:col-span-3 bg-slate-850/70 border border-slate-800 rounded-xl p-5 shadow-xl backdrop-blur-md flex flex-col justify-between">
+                            <div>
+                                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                    <span class="w-4 h-4 bg-emerald-950 text-emerald-400 rounded-md flex items-center justify-center text-[10px] border border-emerald-800/50">02</span>
+                                    Compile
+                                </h2>
+                                <p class="text-[10px] text-slate-400 mb-4 xl:mb-0">Re-evaluate downstream arrays.</p>
+                            </div>
+                            <button onclick="buildEngine()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs py-3 px-4 rounded-xl hover:from-emerald-500 hover:to-teal-500 active:scale-[0.99] transition shadow-md shadow-emerald-950/50 flex items-center justify-center gap-2 mt-2">
+                                <i class="fa-solid fa-play text-[10px]"></i> Build PIM Engine
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 rounded-xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0">
+                        
+                        <div class="px-5 py-2.5 border-b border-slate-800 bg-slate-950/40 flex flex-wrap gap-3 items-center justify-between shrink-0">
+                            <div class="flex flex-wrap gap-1.5" id="studio-tab-group">
+                                <button onclick="switchTab('categories', this)" class="tab tab-active text-xs font-medium px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white border border-indigo-500/30 transition shadow-sm">
+                                    <i class="fa-solid fa-folder-tree mr-1.5 text-[11px]"></i>Categories
+                                </button>
+                                <button onclick="switchTab('productModifiers', this)" class="tab text-xs font-medium px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/50 hover:bg-slate-700/60 transition">
+                                    <i class="fa-solid fa-sliders mr-1.5 text-[11px]"></i>Product Modifiers
+                                </button>
+                                <button onclick="switchTab('modifierContents', this)" class="tab text-xs font-medium px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/50 hover:bg-slate-700/60 transition">
+                                    <i class="fa-solid fa-list-ul mr-1.5 text-[11px]"></i>Modifier Contents
+                                </button>
+                                <button onclick="switchTab('health', this)" class="tab text-xs font-medium px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/50 hover:bg-slate-700/60 transition">
+                                    <i class="fa-solid fa-heart-pulse mr-1.5 text-[11px]"></i>System Health
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 ml-auto min-w-[280px]">
+                                <div class="relative w-full">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                                        <i class="fa-solid fa-magnifying-glass text-[11px]"></i>
+                                    </span>
+                                    <input type="text" id="tab-panel-search" placeholder="Search categories..." class="w-full bg-slate-950 text-slate-200 placeholder-slate-500 text-xs rounded-lg pl-8 pr-3 py-1.5 border border-slate-800 focus:border-indigo-500 focus:outline-none transition font-medium">
+                                </div>
+                                <span id="runtime-view-badge" class="text-[10px] font-mono bg-slate-950 text-slate-400 border border-slate-800 px-2.5 py-1 rounded-md font-bold shrink-0">
+                                    Panel: CATEGORIES
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="p-5 overflow-y-auto flex-1 custom-scrollbar min-h-0 bg-slate-950/10">
+                            <div id="view-categories" class="tab-view-panel h-full transition-all duration-150">
+                                <p class="text-xs text-slate-500 italic text-center py-12">No categorized entities loaded. Import structural datasets above.</p>
+                            </div>
+                            <div id="view-productModifiers" class="tab-view-panel h-full hidden transition-all duration-150">
+                                <p class="text-xs text-slate-500 italic text-center py-12">No system product relational templates matched.</p>
+                            </div>
+                            <div id="view-modifierContents" class="tab-view-panel h-full hidden transition-all duration-150">
+                                <p class="text-xs text-slate-500 italic text-center py-12">Modifier components list stack is empty.</p>
+                            </div>
+                            <div id="view-health" class="tab-view-panel h-full hidden transition-all duration-150">
+                                <p class="text-xs text-slate-500 italic text-center py-12">Run engine build configuration maps to trigger integrity scans.</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 w-full max-w-5xl rounded-xl border border-slate-800 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+            
+            <div class="flex justify-between items-center p-4 bg-slate-950 border-b border-slate-800 shrink-0">
+                <h2 id="modalTitle" class="text-indigo-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2"></h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-sm p-1 transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-4 overflow-auto flex-1 custom-scrollbar bg-slate-900/40">
+                <table class="w-full text-[11px] border-collapse text-left">
+                    <thead class="text-[10px] font-mono text-slate-400 uppercase tracking-wider bg-slate-950 sticky top-0 border-b border-slate-800 backdrop-blur-sm z-10">
+                        <tr>
+                            <th class="p-2.5 bg-slate-950">ID Dimension</th>
+                            <th class="p-2.5 bg-slate-950">Name Asset String</th>
+                            <th class="p-2.5 bg-slate-950">SKU Reference Map</th>
+                            <th class="p-2.5 bg-slate-950 text-right">Action Handler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalBody" class="divide-y divide-slate-800/40"></tbody>
+                </table>
+            </div>
+            
+            <div class="p-3 bg-slate-950 border-t border-slate-800 flex justify-end shrink-0">
+                <button onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-1.5 px-4 rounded-lg border border-slate-700 transition">
+                    Dismiss View
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Track dynamic file uploads labels
+            $('input[type="file"]').on('change', function() {
+                const targetId = $(this).attr('id');
+                const attachedFile = this.files[0];
+                if(attachedFile) {
+                    $(`#${targetId}-label`).text(attachedFile.name).addClass('text-indigo-400 font-bold');
+                }
+            });
+
+            // Unified Realtime Text Search Query Router for Tab Panels
+            $('#tab-panel-search').on('keyup paster input', function() {
+                const query = $(this).val().toLowerCase().trim();
+                const currentActivePanel = $('.tab-view-panel').not('.hidden');
+                
+                if(!currentActivePanel.length) return;
+
+                // Handle standard dynamic UI tables if structured inside your dynamic JS
+                const tableRows = currentActivePanel.find('table tbody tr');
+                if(tableRows.length > 0) {
+                    tableRows.each(function() {
+                        const rowText = $(this).text().toLowerCase();
+                        $(this).toggle(rowText.indexOf(query) > -1);
+                    });
+                    return;
+                }
+
+                // Handle nested grid layout elements or cards if rendered inside your panels
+                const containerItems = currentActivePanel.find('> div, .grid > div, [data-searchable]');
+                if(containerItems.length > 0) {
+                    containerItems.each(function() {
+                        const cellText = $(this).text().toLowerCase();
+                        $(this).toggle(cellText.indexOf(query) > -1);
+                    });
+                }
+            });
+        });
+
+        function switchTab(viewTargetKey, originElement) {
+            $('.tab').removeClass('tab-active bg-indigo-600 text-white border-indigo-500/30 shadow-sm')
+                     .addClass('bg-slate-800 text-slate-300 border-slate-700/50');
+            
+            $(originElement).addClass('tab-active bg-indigo-600 text-white border-indigo-500/30 shadow-sm')
+                            .removeClass('bg-slate-800 text-slate-300 border-slate-700/50');
+
+            $('.tab-view-panel').addClass('hidden');
+            $(`#view-${viewTargetKey}`).removeClass('hidden');
+            
+            $('#runtime-view-badge').text(`Panel: ${viewTargetKey.toUpperCase()}`);
+
+            // Adapt search parameters context fields dynamically 
+            const formattedLabel = $(originElement).text().trim();
+            $('#tab-panel-search').val('').attr('placeholder', `Search ${formattedLabel.toLowerCase()}...`).focus();
+            $('.tab-view-panel').find('table tbody tr, > div, .grid > div').show(); // Reset visible elements mapping
+        }
+
+        const baseCloser = window.closeModal;
+        window.closeModal = function() {
+            $('#modal').addClass('hidden');
+            if (typeof baseCloser === 'function') baseCloser();
+        };
+    </script>
+
+    <script src="../assets/modifier.js"></script>\
+    <script src="../assets/main.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Load component snippet relative to page layout position
+            $("#sidebar-container").load("../shared/sidebar.html", function() {
+                // Pin highlight definitions manually by declaring current view profile token
+                const currentViewKey = "modifier"; // Swap token per index file ('price', 'modifier', or 'mapping')
+                
+                const targetLink = $(`[data-nav="${currentViewKey}"]`);
+                targetLink.removeClass("text-slate-400 hover:text-white hover:bg-slate-800/50")
+                          .addClass("sidebar-link-active text-white bg-indigo-600/10 border border-indigo-500/20 text-indigo-400");
+                targetLink.find('i').removeClass("text-slate-400 text-slate-500").addClass("text-indigo-400");
+            });
+        });
+    </script>
+</body>
+
+</html>

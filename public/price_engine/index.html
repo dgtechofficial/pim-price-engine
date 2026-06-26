@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIM PRICE ENGINE</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/style.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #020617; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white overflow-hidden">
+    
+    <div class="app-shell flex h-screen max-h-screen w-screen overflow-hidden">
+        
+        <div id="sidebar-container" class="h-full flex shrink-0"></div>
+
+        <div class="flex-1 flex flex-col min-w-0 max-h-screen overflow-hidden">
+            <main class="main-content p-6 flex-1 overflow-y-auto custom-scrollbar">
+                <div class="max-w-[1920px] mx-auto space-y-6">
+                    
+                    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                        
+                        <div class="xl:col-span-3 space-y-4">
+                            <div class="bg-slate-850 bg-opacity-70 border border-slate-800 rounded-xl p-5 shadow-xl backdrop-blur-md">
+                                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <span class="w-4 h-4 bg-indigo-950 text-indigo-400 rounded-md flex items-center justify-center text-[10px] border border-indigo-800/50">01</span>
+                                    Dual Ingestion Queue
+                                </h2>
+
+                                <div class="mb-4">
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider">File 1: Pricing Base Sheet</label>
+                                        <span id="t1-count" class="text-[9px] font-mono text-slate-500">Empty Stack</span>
+                                    </div>
+                                    <label class="flex flex-col items-center justify-center border border-dashed border-blue-900 bg-blue-950/10 rounded-xl p-3.5 cursor-pointer hover:bg-blue-950/20 transition group relative">
+                                        <i class="fa-solid fa-file-invoice-dollar text-lg text-blue-500 group-hover:scale-110 transition mb-1"></i>
+                                        <span id="file1-label" class="text-[11px] font-medium text-slate-400 text-center max-w-[200px] truncate">Load matrix sheet</span>
+                                        <input type="file" id="file1" class="hidden">
+                                    </label>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="block text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1.5">File 2: PIM Structure Map</label>
+                                    <label class="flex flex-col items-center justify-center border border-dashed border-emerald-900 bg-emerald-950/10 rounded-xl p-3.5 cursor-pointer hover:bg-emerald-950/20 transition group relative">
+                                        <i class="fa-solid fa-sitemap text-lg text-emerald-500 group-hover:scale-110 transition mb-1"></i>
+                                        <span id="file2-label" class="text-[11px] font-medium text-slate-400 text-center max-w-[200px] truncate">Load structure map</span>
+                                        <input type="file" id="file2" class="hidden">
+                                    </label>
+                                </div>
+
+                                <div class="space-y-2 pt-2 border-t border-slate-800/60">
+                                    <button id="process" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg shadow-indigo-950/50 transition flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-bolt text-[11px]"></i> Run Pipeline Evaluation
+                                    </button>
+                                    <button id="clear-all" class="w-full bg-slate-800 hover:bg-slate-700/80 text-slate-300 font-bold text-xs py-2 px-4 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-power-off text-[10px]"></i> Flush Engine State
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="export-card" class="bg-slate-850 border border-slate-800 rounded-xl p-5 shadow-xl hidden">
+                                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <span class="w-4 h-4 bg-emerald-950 text-emerald-400 rounded-md flex items-center justify-center text-[10px] border border-emerald-800/50">02</span>
+                                    Channel Outgest Staging
+                                </h2>
+                                <p class="text-[10px] text-slate-400 mb-4">Export isolated channel matrices formatted into standard worksheets.</p>
+                                <div id="export-button-target-group" class="space-y-2"></div>
+                            </div>
+
+                            <div id="audit-card" class="bg-slate-850 border border-rose-950/40 rounded-xl p-5 shadow-xl hidden">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h2 class="text-xs font-bold text-rose-400 uppercase tracking-widest flex items-center gap-2">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> Unmapped Anomalies
+                                    </h2>
+                                    <span id="unmapped-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-rose-950 text-rose-400 border border-rose-900/40">0</span>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <button id="view-unmapped" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-[11px] py-1.5 px-3 rounded-lg border border-slate-700 transition">
+                                        Inspect Complete Breakdown List
+                                    </button>
+                                    <div hidden id="unmapped-list-container" class="max-h-48 overflow-y-auto divide-y divide-slate-800/50 border border-slate-800 rounded-lg bg-slate-950/50 custom-scrollbar text-[11px]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="xl:col-span-9 space-y-6 flex flex-col">
+                            <div class="bg-slate-900 rounded-xl border border-slate-800 shadow-xl overflow-hidden">
+                                <div class="px-4 py-2 border-b border-slate-800 bg-slate-950/30 flex justify-between items-center">
+                                    <h3 class="text-[11px] font-mono tracking-wider text-blue-400 uppercase font-bold flex items-center gap-1.5">
+                                        <i class="fa-solid fa-table-list text-blue-500"></i> Staged Base File Preview Matrix (Top 15 Columns Bound)
+                                    </h3>
+                                </div>
+                                <div class="overflow-x-auto max-h-[220px] custom-scrollbar">
+                                    <table id="table1" class="w-full text-[11px] border-collapse text-left text-slate-400 font-sans">
+                                        <tbody>
+                                            <tr>
+                                                <td class="p-4 text-center text-slate-500 italic font-normal">Awaiting data sheet ingestion...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-900 rounded-xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+                                <div class="px-5 py-3 border-b border-slate-800 bg-slate-950/40 flex justify-between items-center">
+                                    <h3 class="text-xs font-bold tracking-wider text-indigo-400 uppercase flex items-center gap-2">
+                                        <i class="fa-solid fa-diagram-project text-indigo-500"></i> Evaluated Cross-Channel Variance Price Matrix
+                                    </h3>
+                                    <span id="t2-count" class="text-[10px] font-mono bg-slate-950 text-slate-400 border border-slate-800 px-2 py-0.5 rounded font-bold">Unprocessed</span>
+                                </div>
+                                
+                                <div class="overflow-auto max-h-[580px] custom-scrollbar relative">
+                                    <table class="w-full text-[11px] border-collapse text-left" id="table2">
+                                        <tbody>
+                                            <tr>
+                                                <td class="p-12 text-center text-slate-500 italic font-normal">
+                                                    <i class="fa-solid fa-table-cells block text-2xl mb-2 text-slate-600"></i> No relational models generated. Load targets into both processing queues above.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-indigo-400"></i> Channel Identifier Definitions
+                </h3>
+                <button id="close-settings-modal" class="text-slate-500 hover:text-white text-sm transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-medium text-slate-400 mb-1">Apollo Channel Constant Mapping Identifier</label>
+                    <input type="text" id="cfg-apollo" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 font-mono text-slate-200 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-400 mb-1">Grab Channel Constant Mapping Identifier</label>
+                    <input type="text" id="cfg-grab" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 font-mono text-slate-200 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-400 mb-1">Foodpanda Channel Constant Mapping Identifier</label>
+                    <input type="text" id="cfg-foodpanda" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 font-mono text-slate-200 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div class="pt-2">
+                    <div class="text-[10px] text-slate-500 font-semibold mb-1 uppercase tracking-wider">Target Destination Output Folder</div>
+                    <div id="dynamic-data-directory" class="bg-slate-950 p-2 border border-slate-850 rounded-lg font-mono text-[10px] text-slate-400 break-all select-all">
+                        Evaluating structural configuration context...
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between gap-3 pt-3 border-t border-slate-800/60">
+                <button id="reset-settings-btn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-slate-300 font-bold text-xs transition">
+                    Restore Defaults
+                </button>
+                <div class="flex gap-2">
+                    <button id="save-settings-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-950/40 transition">
+                        Save & Apply Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="unmapped-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden">
+        <div class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-slate-800 bg-slate-950/40 flex justify-between items-center">
+                <h3 class="text-xs font-bold text-rose-400 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i> Missing Reference Price Lookup Matrix Error Log
+                </h3>
+                <button id="close-modal" class="text-slate-500 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="unmapped-list-modal" class="p-2 overflow-y-auto divide-y divide-slate-800/40 bg-slate-950/20 custom-scrollbar flex-1 font-mono text-[11px]"></div>
+            <div class="p-4 border-t border-slate-800/80 text-right bg-slate-950/20">
+                <button id="close-modal-btn" class="bg-slate-800 hover:bg-slate-700/80 border border-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    Close Diagnostics View
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/constants.js"></script>
+    <script src="../assets/engine.js"></script>
+    <script src="../assets/app.js"></script>
+    <script src="../assets/main.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Load component snippet relative to page layout position
+            $("#sidebar-container").load("../shared/sidebar.html", function() {
+                // Pin highlight definitions manually by declaring current view profile token
+                const currentViewKey = "price"; // Swap token per index file ('price', 'modifier', or 'mapping')
+                
+                const targetLink = $(`[data-nav="${currentViewKey}"]`);
+                targetLink.removeClass("text-slate-400 hover:text-white hover:bg-slate-800/50")
+                          .addClass("sidebar-link-active text-white bg-indigo-600/10 border border-indigo-500/20 text-indigo-400");
+                targetLink.find('i').removeClass("text-slate-400 text-slate-500").addClass("text-indigo-400");
+            });
+        });
+    </script>
+</body>
+
+</html>

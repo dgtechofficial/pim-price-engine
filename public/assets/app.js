@@ -1,3 +1,4 @@
+
 class UIController {
     constructor(engine) {
         this.engine = engine;
@@ -47,7 +48,7 @@ class UIController {
 
         const priceMap = this.engine.createPriceLookupMap(this.state.file1);
         const f2IdMap = this.engine.createRowByIdMap(this.state.file2);
-        
+
         this.state.exportRows = [];
         let html = this.generateTableHeaderMarkup();
         let matchesCount = 0;
@@ -60,7 +61,7 @@ class UIController {
 
             let refSku = String(row[this.engine.FILE2_COL.IRONMAN_REFERENCE_SKU] ?? "").trim();
             let mulParId = String(row[this.engine.FILE2_COL.PIM_MULTIPLIER_ID] ?? "").trim();
-            
+
             let rowMultiplier = parseFloat(row[this.engine.FILE2_COL.PIM_MULTIPLIER]) || 1;
             if (rowMultiplier <= 0) rowMultiplier = 1;
 
@@ -192,7 +193,10 @@ class UIController {
                     <span class="text-[11px] text-slate-500 text-right truncate max-w-[320px]">${item.desc}</span>
                 </div>`;
             });
+
+            // Render to BOTH the sidebar card preview and the main diagnostics modal container
             $("#unmapped-list-container").html(listHtml);
+            $("#unmapped-list-modal").html(listHtml);
         } else {
             $("#audit-card").addClass("hidden");
         }
@@ -251,18 +255,18 @@ $(document).ready(() => {
         try {
             // Decode URI component to get rid of browser characters like %20 in paths
             let rawPath = decodeURIComponent(window.location.pathname);
-            
+
             // Strip off index.html from the trailing edge
             let folderPath = rawPath.substring(0, rawPath.lastIndexOf('/'));
-            
+
             // Clean up Windows formatting if it retains an unnecessary leading slash (e.g., /D:/folder)
             if (folderPath.startsWith('/') && folderPath.charAt(2) === ':') {
                 folderPath = folderPath.substring(1);
             }
-            
+
             // Inject the precise data destination target text link straight into the card layout view
             $("#dynamic-data-directory").html(`<i class="fa-solid fa-folder-open text-[9px] text-indigo-400 mr-1"></i>${folderPath}/data/`);
-        } catch(e) {
+        } catch (e) {
             $("#dynamic-data-directory").text("./data/");
         }
 
@@ -284,18 +288,18 @@ $(document).ready(() => {
             GRAB: $("#cfg-grab").val().trim() || "Grab",
             FOODPANDA: $("#cfg-foodpanda").val().trim() || "Foodpanda"
         };
-        
+
         // Triggers the download pipeline cleanly
         window.ConfigService.saveAsFile(updatedConstants);
-        
+
         // Update temporary layout execution contexts immediately
         ui.constants = updatedConstants;
         ui.buildExportButtons();
-        
+
         if (ui.state.file2.length > 0) {
             ui.processEnginePipelines();
         }
-        
+
         $("#settings-modal").addClass("hidden");
     });
 
@@ -344,7 +348,7 @@ $(document).ready(() => {
         const chName = $(this).attr("data-channel");
         const rows = ui.state.exportRows.filter(r => r["Channel"] === chName);
         if (!rows.length) return alert(`No record mutations staged for channel value: ${chName}`);
-        
+
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Calculated Channel Matrix");
