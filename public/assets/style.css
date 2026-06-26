@@ -1,59 +1,150 @@
+/* Full Page Smooth Entry/Exit Animations */
+body {
+    transition: opacity 0.2s linear;
+    opacity: 1;
+}
+
+body.page-exit {
+    opacity: 0;
+}
+
+@keyframes pageFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.995);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.app-shell {
+    animation: pageFadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 /* Custom Background Utility Token Overrides */
-.bg-slate-850 { 
-    background-color: #1e293b; 
+.bg-slate-850 {
+    background-color: #1e293b;
 }
 
 /* Scroll Engine Custom UI Layout Controls */
-.custom-scrollbar::-webkit-scrollbar { 
-    width: 6px; 
-    height: 6px; 
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track { 
-    background: #020617; 
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #020617;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb { 
-    background: #334155; 
-    border-radius: 4px; 
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { 
-    background: #475569; 
-}
-
-/* Sidebar and layout utilities */
-.app-shell { min-height: 100vh; }
-.sidebar { width: min(280px, 100%); background: rgba(15, 23, 42, 0.98); border-right: 1px solid #0f172a; }
-.sidebar-brand { padding: 1.5rem; border-bottom: 1px solid #0f172a; }
-.brand-mark { width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border-radius: 1rem; background: #4f46e5; color: white; font-weight: 700; }
-.sidebar-nav { display: flex; flex-direction: column; gap: 0.35rem; padding: 1rem; }
-.sidebar-link { display: flex; align-items: center; gap: 0.75rem; width: 100%; color: #cbd5e1; padding: 0.9rem 1rem; border-radius: 0.95rem; border: 1px solid transparent; font-size: 0.95rem; transition: all 0.2s ease; text-decoration: none; }
-.sidebar-link:hover, .sidebar-link:focus { color: #fff; background: rgba(99, 102, 241, 0.14); border-color: #334155; }
-.sidebar-link-active { color: #fff; background: rgba(99, 102, 241, 0.24); border-color: #4338ca; box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.12); }
-.sidebar-link i { width: 1.25rem; text-align: center; }
-.sidebar-footer { padding: 1rem; border-top: 1px solid #0f172a; color: #94a3b8; font-size: 0.78rem; }
-.main-content { padding: 1.5rem; }
-.page-title-badge { display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 9999px; padding: 0.5rem 0.75rem; background: rgba(99, 102, 241, 0.14); color: #c7d2fe; font-size: 0.75rem; }
-@media (max-width: 1023px) {
-  .app-shell { flex-direction: column; }
-  .sidebar { width: 100%; position: relative; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #475569;
 }
 
 /* Sidebar and layout utilities */
-.app-shell { min-height: 100vh; }
-.sidebar { width: min(280px, 100%); background: rgba(15, 23, 42, 0.98); border-right: 1px solid #0f172a; }
-.sidebar-brand { padding: 1.5rem; border-bottom: 1px solid #0f172a; }
-.brand-mark { width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border-radius: 1rem; background: #4f46e5; color: white; font-weight: 700; }
-.sidebar-nav { display: flex; flex-direction: column; gap: 0.35rem; padding: 1rem; }
-.sidebar-link { display: flex; align-items: center; gap: 0.75rem; width: 100%; color: #cbd5e1; padding: 0.9rem 1rem; border-radius: 0.95rem; border: 1px solid transparent; font-size: 0.95rem; transition: all 0.2s ease; text-decoration: none; }
-.sidebar-link:hover, .sidebar-link:focus { color: #fff; background: rgba(99, 102, 241, 0.14); border-color: #334155; }
-.sidebar-link-active { color: #fff; background: rgba(99, 102, 241, 0.24); border-color: #4338ca; box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.12); }
-.sidebar-link i { width: 1.25rem; text-align: center; }
-.sidebar-footer { padding: 1rem; border-top: 1px solid #0f172a; color: #94a3b8; font-size: 0.78rem; }
-.main-content { padding: 1.5rem; }
-.page-title-badge { display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 9999px; padding: 0.5rem 0.75rem; background: rgba(99, 102, 241, 0.14); color: #c7d2fe; font-size: 0.75rem; }
+.app-shell {
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: min(280px, 100%);
+    background: rgba(15, 23, 42, 0.98);
+    border-right: 1px solid #0f172a;
+}
+
+.sidebar-brand {
+    /* padding: 1.5rem; */
+    border-bottom: 1px solid #0f172a;
+}
+
+.brand-mark {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    background: #4f46e5;
+    color: white;
+    font-weight: 700;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    /* padding: 1rem; */
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    color: #cbd5e1;
+    padding: 0.9rem 1rem;
+    border-radius: 0.95rem;
+    border: 1px solid transparent;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.sidebar-link:hover,
+.sidebar-link:focus {
+    color: #fff;
+    background: rgba(99, 102, 241, 0.14);
+    border-color: #334155;
+}
+
+.sidebar-link-active {
+    color: #fff;
+    background: rgba(99, 102, 241, 0.24);
+    border-color: #4338ca;
+    box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.12);
+}
+
+.sidebar-link i {
+    width: 1.25rem;
+    text-align: center;
+}
+
+.sidebar-footer {
+    /* padding: 1rem; */
+    border-top: 1px solid #0f172a;
+    color: #94a3b8;
+    font-size: 0.78rem;
+}
+
+.main-content {
+    padding: 1px;
+}
+
+.page-title-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.5rem 0.75rem;
+    background: rgba(99, 102, 241, 0.14);
+    color: #c7d2fe;
+    font-size: 0.75rem;
+}
+
 @media (max-width: 1023px) {
-  .app-shell { flex-direction: column; }
-  .sidebar { width: 100%; position: relative; }
+    .app-shell {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        position: relative;
+    }
 }
