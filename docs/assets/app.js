@@ -236,6 +236,47 @@ class UIController {
         $("#table1").html('<tbody><tr><td class="p-4 text-center text-slate-500 italic font-normal">Awaiting data sheet ingestion...</td></tr></tbody>');
         $("#table2").html('<tbody><tr><td class="p-12 text-center text-slate-500 italic font-normal">No relational models generated.</td></tr></tbody>');
     }
+
+    getUnmappedTSV() {
+        const headers = ["SKU", "Description"];
+        const lines = [headers.join("\t")];
+
+        this.state.unmappedSkus.forEach(item => {
+            const row = [item.sku, item.desc]
+                .map(val => String(val ?? "").replace(/\t/g, " ").replace(/\r?\n/g, " ").trim());
+            lines.push(row.join("\t"));
+        });
+
+        return lines.join("\n");
+    }
+
+    async copyUnmappedToClipboard() {
+        if (!this.state.unmappedSkus.length) {
+            return { success: false, count: 0 };
+        }
+        const tsv = this.getUnmappedTSV();
+
+        try {
+            await navigator.clipboard.writeText(tsv);
+            return { success: true, count: this.state.unmappedSkus.length };
+        } catch (err) {
+            // Fallback for older/non-HTTPS contexts
+            try {
+                const ta = document.createElement("textarea");
+                ta.value = tsv;
+                ta.style.position = "fixed";
+                ta.style.opacity = "0";
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                const ok = document.execCommand("copy");
+                document.body.removeChild(ta);
+                return { success: ok, count: this.state.unmappedSkus.length };
+            } catch (fallbackErr) {
+                return { success: false, count: 0 };
+            }
+        }
+    }
 }
 
 $(document).ready(() => {
@@ -342,6 +383,14 @@ $(document).ready(() => {
     $("#view-unmapped").on("click", () => $("#unmapped-modal").removeClass("hidden"));
     $("#close-modal, #close-modal-btn").on("click", () => $("#unmapped-modal").addClass("hidden"));
 
+    $("#copy-unmapped-btn").on("click", async () => {
+        const result = await ui.copyUnmappedToClipboard();
+        showCopyToast(
+            result.success ? `Copied ${result.count} rows — paste into Excel` : "Nothing to copy",
+            result.success
+        );
+    });
+
     // Event Delegation handling for dynamic download handlers
     $("#export-button-target-group").on("click", ".export-btn", function (e) {
         e.preventDefault();
@@ -354,4 +403,20 @@ $(document).ready(() => {
         XLSX.utils.book_append_sheet(wb, ws, "Calculated Channel Matrix");
         XLSX.writeFile(wb, `PIM_${chName.replace(/\s+/g, '_')}.xlsx`);
     });
+
+    function showCopyToast(message, success) {
+        const existing = document.getElementById("copy-toast");
+        if (existing) existing.remove();
+
+        const toast = document.createElement("div");
+        toast.id = "copy-toast";
+        toast.className = `fixed bottom-6 right-6 z-[60] px-4 py-2 rounded-xl text-xs font-bold shadow-2xl border transition ${
+            success
+                ? "bg-emerald-950 border-emerald-800 text-emerald-300"
+                : "bg-rose-950 border-rose-800 text-rose-300"
+        }`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2200);
+    }
 });
