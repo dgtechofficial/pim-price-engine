@@ -40,31 +40,63 @@
 
                                 <div class="mb-4">
                                     <div class="flex justify-between items-center mb-1.5">
-                                        <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider">File 1: Pricing Base Sheet</label>
+                                        <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider">File 1: PRICE TEMPLATE</label>
                                         <span id="t1-count" class="text-[9px] font-mono text-slate-500">Empty Stack</span>
                                     </div>
                                     <label class="flex flex-col items-center justify-center border border-dashed border-blue-900 bg-blue-950/10 rounded-xl p-3.5 cursor-pointer hover:bg-blue-950/20 transition group relative">
                                         <i class="fa-solid fa-file-invoice-dollar text-lg text-blue-500 group-hover:scale-110 transition mb-1"></i>
-                                        <span id="file1-label" class="text-[11px] font-medium text-slate-400 text-center max-w-[200px] truncate">Load matrix sheet</span>
+                                        <span id="file1-label" class="text-[11px] font-medium text-slate-400 text-center max-w-[200px] truncate">Load price template file</span>
                                         <input type="file" id="file1" class="hidden">
                                     </label>
                                 </div>
 
                                 <div class="mb-4">
-                                    <label class="block text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1.5">File 2: PIM Structure Map</label>
+                                    <label class="block text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1.5">File 2: PIM Reference Data</label>
                                     <label class="flex flex-col items-center justify-center border border-dashed border-emerald-900 bg-emerald-950/10 rounded-xl p-3.5 cursor-pointer hover:bg-emerald-950/20 transition group relative">
                                         <i class="fa-solid fa-sitemap text-lg text-emerald-500 group-hover:scale-110 transition mb-1"></i>
-                                        <span id="file2-label" class="text-[11px] font-medium text-slate-400 text-center max-w-[200px] truncate">Load structure map</span>
+                                        <span id="file2-label" class="text-[11px] font-medium text-slate-400 text-center max-w-[200px] truncate">Load PIM reference file</span>
                                         <input type="file" id="file2" class="hidden">
                                     </label>
                                 </div>
 
+                                <div class="space-y-3">
+                                    <!-- File 3 -->
+                                    <div class="flex items-center justify-between p-3 border border-dashed border-emerald-900/60 bg-emerald-950/10 rounded-lg hover:bg-emerald-950/20 transition">
+                                        <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">FP PIM Price Data</span>
+                                        <label class="flex items-center gap-2 cursor-pointer group">
+                                            <span id="file3-label" class="text-[11px] font-medium text-slate-400 max-w-[150px] truncate">Load Foodpanda PIM</span>
+                                            <i class="fa-solid fa-cloud-arrow-up text-emerald-500 group-hover:scale-110 transition"></i>
+                                            <input type="file" id="file3" class="hidden">
+                                        </label>
+                                    </div>
+
+                                    <!-- File 4 -->
+                                    <div class="flex items-center justify-between p-3 border border-dashed border-emerald-900/60 bg-emerald-950/10 rounded-lg hover:bg-emerald-950/20 transition">
+                                        <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">GF PIM Price Data</span>
+                                        <label class="flex items-center gap-2 cursor-pointer group">
+                                            <span id="file4-label" class="text-[11px] font-medium text-slate-400 max-w-[150px] truncate">Load Grab PIM</span>
+                                            <i class="fa-solid fa-cloud-arrow-up text-emerald-500 group-hover:scale-110 transition"></i>
+                                            <input type="file" id="file4" class="hidden">
+                                        </label>
+                                    </div>
+
+                                    <!-- File 5 -->
+                                    <div class="flex items-center justify-between p-3 border border-dashed border-emerald-900/60 bg-emerald-950/10 rounded-lg hover:bg-emerald-950/20 transition">
+                                        <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">AP PIM Price Data</span>
+                                        <label class="flex items-center gap-2 cursor-pointer group">
+                                            <span id="file5-label" class="text-[11px] font-medium text-slate-400 max-w-[150px] truncate">Load Apollo PIM</span>
+                                            <i class="fa-solid fa-cloud-arrow-up text-emerald-500 group-hover:scale-110 transition"></i>
+                                            <input type="file" id="file5" class="hidden">
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="space-y-2 pt-2 border-t border-slate-800/60">
                                     <button id="process" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg shadow-indigo-950/50 transition flex items-center justify-center gap-2">
-                                        <i class="fa-solid fa-bolt text-[11px]"></i> Run Pipeline Evaluation
+                                        <i class="fa-solid fa-bolt text-[11px]"></i> Run Price Evaluation Engine
                                     </button>
                                     <button id="clear-all" class="w-full bg-slate-800 hover:bg-slate-700/80 text-slate-300 font-bold text-xs py-2 px-4 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
-                                        <i class="fa-solid fa-power-off text-[10px]"></i> Flush Engine State
+                                        <i class="fa-solid fa-power-off text-[10px]"></i> Reset Engine State
                                     </button>
                                 </div>
                             </div>

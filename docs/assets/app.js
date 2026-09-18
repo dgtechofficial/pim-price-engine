@@ -2,7 +2,7 @@
 class UIController {
     constructor(engine) {
         this.engine = engine;
-        this.state = { file1: [], file2: [], exportRows: [], unmappedSkus: [] };
+        this.state = { file1: [], file2: [], file3: [], file4: [], file5: [], exportRows: [], unmappedSkus: [] };
         this.constants = window.ConfigService.load();
     }
 
@@ -113,10 +113,51 @@ class UIController {
                 <td class="p-2 text-center border-r border-slate-800 font-mono font-bold ${rowMultiplier !== 1 ? 'text-amber-400 bg-amber-950/20' : 'text-slate-400'}">${row[this.engine.FILE2_COL.PIM_MULTIPLIER] ?? ""}</td>
                 <td class="p-2 text-center border-r border-slate-800 ${isInheritedFallback ? 'bg-indigo-950 text-indigo-300 font-black border-indigo-900' : 'text-slate-500'}">${row[this.engine.FILE2_COL.PIM_MULTIPLIER_ID] ?? ""}</td>
                 
-                ${this.buildCells(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, "bg-blue-950/10", "border-blue-900/40", rowMultiplier, parentMultiplier)}
-                ${this.buildCells(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.APOLLO, "bg-emerald-950/10", "border-emerald-900/40", rowMultiplier, parentMultiplier)}
-                ${this.buildCells(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.GRAB, "bg-amber-950/10", "border-amber-900/40", rowMultiplier, parentMultiplier)}
-                ${this.buildCells(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.FOODPANDA, "bg-pink-950/10", "border-pink-900/40", rowMultiplier, parentMultiplier, true)}
+                ${
+                    // PICK UP
+                    this.buildCells(
+                        matchedPriceRow,
+                        parentPriceRow, 
+                        this.engine.FILE1_COL.PICKUP, 
+                        "bg-blue-950/10", 
+                        "border-blue-900/40", 
+                        rowMultiplier, 
+                        parentMultiplier, 
+                        false,
+                        [ 
+                            this.state.file3,
+                            this.state.file4,
+                            this.state.file5
+                        ],
+                        row[this.engine.FILE2_COL.ID]
+                    )}
+                ${
+                    // APOLLO
+                    this.buildCells(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.APOLLO, "bg-emerald-950/10", "border-emerald-900/40", rowMultiplier, parentMultiplier,
+                        false,
+                        [ 
+                            this.state.file5
+                        ],
+                        row[this.engine.FILE2_COL.ID]
+                    )}
+                ${
+                    // GRAB
+                    this.buildCells(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.GRAB, "bg-amber-950/10", "border-amber-900/40", rowMultiplier, parentMultiplier,
+                        false,
+                        [ 
+                            this.state.file4
+                        ],
+                        row[this.engine.FILE2_COL.ID]
+                    )}
+                ${
+                    // FOODPANDA
+                    this.buildCells(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.FOODPANDA, "bg-pink-950/10", "border-pink-900/40", rowMultiplier, parentMultiplier, 
+                        true,
+                        [ 
+                            this.state.file3
+                        ],
+                        row[this.engine.FILE2_COL.ID]
+                    )}
             </tr>`;
 
             this.stageExportRows(row, f2IdMap, mulParId, refSku, isInheritedFallback, matchedPriceRow, parentPriceRow, rowMultiplier, parentMultiplier);
@@ -134,10 +175,10 @@ class UIController {
         this.updateAuditInterface();
     }
 
-    buildCells(cRow, pRow, startIdx, bg, border, cMul, pMul, isLast = false) {
+    buildCells(cRow, pRow, startIdx, bg, border, cMul, pMul, isLast = false, sourceRows = [], productId) {
         let out = "";
         for (let offset = 0; offset < 5; offset++) {
-            let finalPrice = this.engine.calculateValue(cRow, pRow, startIdx, offset, cMul, pMul);
+            let finalPrice = this.engine.calculateValue(cRow, pRow, startIdx, offset, cMul, pMul,sourceRows,productId);
             let color = pRow ? "text-purple-400 font-bold" : "text-slate-300";
             let bStyle = `border-r ${border}`;
             if (offset === 4 && !isLast) bStyle = "border-r border-slate-700";
@@ -155,21 +196,49 @@ class UIController {
             { name: this.constants.FOODPANDA, startIdx: this.engine.FILE1_COL.FOODPANDA }
         ];
         Channel.forEach(ch => {
+            const channel     = ch.name;
+            const productId = row[this.engine.FILE2_COL.ID] ?? "";
+            const productName = row[this.engine.FILE2_COL.PRODUCT] ?? "";
+
+            const PIMFPFile = this.state.file3;
+            const PIMGFFile = this.state.file4;
+            const PIMApolloFile = this.state.file5;
+
+            let sourceRow = null;
+
+            if(channel == 'JB Web Delivery'){
+                sourceRow = [PIMApolloFile];
+            }
+
+            if(channel == 'Grab'){
+                sourceRow = [PIMGFFile];
+            }
+
+            if(channel == 'Foodpanda'){
+                sourceRow = [PIMFPFile];
+            }
+
+            const PickupRefFile =   [
+                                        PIMFPFile,
+                                        PIMGFFile,
+                                        PIMApolloFile
+                                    ]
+
             this.state.exportRows.push({
-                "Product ID": row[this.engine.FILE2_COL.ID] ?? "",
-                "Name": row[this.engine.FILE2_COL.PRODUCT] ?? "",
-                "Channel": ch.name,
+                "Product ID": productId,
+                "Name": productName,
+                "Channel": channel,
                 // "ironman_reference_sku": isInheritedFallback ? String(f2IdMap[mulParId]?.[this.engine.FILE2_COL.IRONMAN_REFERENCE_SKU] ?? "") : refSku,
-                "10% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 2, rowMultiplier, parentMultiplier),
-                "10% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 2, rowMultiplier, parentMultiplier),
-                "15% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 3, rowMultiplier, parentMultiplier),
-                "15% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 3, rowMultiplier, parentMultiplier),
-                "20% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 4, rowMultiplier, parentMultiplier),
-                "20% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 4, rowMultiplier, parentMultiplier),
-                "5% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 1, rowMultiplier, parentMultiplier),
-                "5% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 1, rowMultiplier, parentMultiplier),
-                "Standard Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 0, rowMultiplier, parentMultiplier),
-                "Standard Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 0, rowMultiplier, parentMultiplier),
+                "10% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 2, rowMultiplier, parentMultiplier, sourceRow , productId),
+                "10% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 2, rowMultiplier, parentMultiplier, PickupRefFile , productId),
+                "15% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 3, rowMultiplier, parentMultiplier, sourceRow , productId),
+                "15% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 3, rowMultiplier, parentMultiplier, PickupRefFile , productId),
+                "20% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 4, rowMultiplier, parentMultiplier, sourceRow , productId),
+                "20% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 4, rowMultiplier, parentMultiplier, PickupRefFile , productId),
+                "5% Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 1, rowMultiplier, parentMultiplier, sourceRow , productId),
+                "5% Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 1, rowMultiplier, parentMultiplier, PickupRefFile , productId),
+                "Standard Delivery - Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, ch.startIdx, 0, rowMultiplier, parentMultiplier, sourceRow , productId),
+                "Standard Delivery - Pickup Price": this.engine.calculateValue(matchedPriceRow, parentPriceRow, this.engine.FILE1_COL.PICKUP, 0, rowMultiplier, parentMultiplier, PickupRefFile , productId),
                 "Core Menu": row[this.engine.FILE2_COL.PIM_CORE_MENU] ?? "", // Maps directly from structure schema if index exists
                 "Categories": row[this.engine.FILE2_COL.PIM_CATEGORIES] ?? "", // Falls back to class if blank
                 "SKU": row[this.engine.FILE2_COL.PIM_SKU] ?? "", // Active product structural stock identifier
@@ -226,10 +295,13 @@ class UIController {
     }
 
     flushState() {
-        this.state = { file1: [], file2: [], exportRows: [], unmappedSkus: [] };
-        $("#file1, #file2").val("");
-        $("#file1-label").text("Load matrix sheet").removeClass("text-blue-400 font-bold");
-        $("#file2-label").text("Load structure map").removeClass("text-emerald-400 font-bold");
+        this.state = { file1: [], file2: [], file3: [],file4: [],file5: [], exportRows: [], unmappedSkus: [] };
+        $("#file1, #file2, #file3, #file4, #file5").val("");
+        $("#file1-label").text("Load price template file").removeClass("text-blue-400 font-bold");
+        $("#file2-label").text("Load PIM reference file").removeClass("text-emerald-400 font-bold");
+        $("#file3-label").text("Load Foodpanda PIM").removeClass("text-blue-400 font-bold");
+        $("#file4-label").text("Load Grab PIM").removeClass("text-blue-400 font-bold");
+        $("#file5-label").text("Load Apollo PIM").removeClass("text-blue-400 font-bold");
         $("#t1-count").text("Empty Stack");
         $("#t2-count").text("Unprocessed");
         $("#export-card, #audit-card, #unmapped-modal").addClass("hidden");
@@ -368,10 +440,43 @@ $(document).ready(() => {
         }
     });
 
+    $("#file3").on("change", async function () {
+        if (this.files[0]) {
+            try {
+                $("#file3-label").text(this.files[0].name).addClass("text-emerald-400 font-bold");
+                ui.state.file3 = await window.ExcelReader.read(this.files[0]);
+            } catch (err) {
+                alert("Runtime IO Exception Parsing File 2");
+            }
+        }
+    });
+
+    $("#file4").on("change", async function () {
+        if (this.files[0]) {
+            try {
+                $("#file4-label").text(this.files[0].name).addClass("text-emerald-400 font-bold");
+                ui.state.file4 = await window.ExcelReader.read(this.files[0]);
+            } catch (err) {
+                alert("Runtime IO Exception Parsing File 2");
+            }
+        }
+    });
+
+    $("#file5").on("change", async function () {
+        if (this.files[0]) {
+            try {
+                $("#file5-label").text(this.files[0].name).addClass("text-emerald-400 font-bold");
+                ui.state.file5 = await window.ExcelReader.read(this.files[0]);
+            } catch (err) {
+                alert("Runtime IO Exception Parsing File 2");
+            }
+        }
+    });
+
     $("#process").on("click", (e) => {
         e.preventDefault();
-        if (!ui.state.file1.length || !ui.state.file2.length) {
-            alert("Validation Error: Please supply targets for both processing queues before calculations run.");
+        if (!ui.state.file1.length || !ui.state.file2.length || !ui.state.file3.length || !ui.state.file4.length || !ui.state.file5.length) {
+            alert("Validation Error: One or more of the required files are missing please check before running the pipeline again");
             return;
         }
         ui.renderRawTemplateTable(ui.state.file1);
