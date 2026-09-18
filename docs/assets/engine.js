@@ -93,8 +93,8 @@ window.PriceEngine = class PriceEngine {
      * Calculates values using the substituted base product prices whenever a multiplier ID redirect occurs.
      */
     calculateValue(basePriceRow, parentPriceRow, startIdx, offset, childMul = 1, parentMul = 1) {
-        // If the targeted base product price record wasn't found in File 1, fallback to 0
-        if (!basePriceRow) return 0;
+        // If the targeted base product price record wasn't found in File 1, fallback to empty
+        if (!basePriceRow) return '';
 
         // Base calculation uses the price row of the product identified via the mul id override rule
         let rawChildPrice = parseFloat(basePriceRow[startIdx + offset]) || 0;
